@@ -1,62 +1,47 @@
-#include <chrono>
-#include <condition_variable>
-#include <functional>
-#include <iostream>
-#include <mutex>
-#include <thread>
+#include "timer.h"
 
-class Timer
+void Timer::worker()
 {
-private:
-	std::chrono::duration<int> timeout;
+	std::unique_lock<std::mutex> guard(mx);
+	cond.wait_for(guard, timeout);
+	if (running)
+		func();
+	cond.notify_one();
+	running = false;
+}
 
-	bool running = false;
-	std::mutex mx;
-	std::condition_variable cond;
-	std::thread t_time;
-	std::function<void()> func;
+Timer::Timer(std::chrono::duration<int> waittime, std::function<void()> donefunc)
+{
+	timeout = waittime;
+	func = std::move(donefunc);
+}
 
-	void worker()
+bool Timer::isRunning()
+{
+	return running;
+}
+
+void Timer::setTimeout(std::chrono::duration<int> waittime)
+{
+	timeout = waittime;
+}
+
+void Timer::start(std::chrono::duration<int> waittime)
+{
+	if (waittime != std::chrono::minutes(0))
+		timeout = waittime;
+	if (running)
+		stop();
+	running = true;
+	t_time = std::thread(&Timer::worker, this);
+}
+
+void Timer::stop()
+{
+	if (running)
 	{
-		std::unique_lock<std::mutex> guard(mx);
-		cond.wait_for(guard, timeout);
-		if (running)
-			func();
-		cond.notify_one();
 		running = false;
+		cond.notify_one();
+		t_time.join();
 	}
-
-public:
-	Timer(std::chrono::duration<int> waittime, std::function<void()> donefunc)
-	{
-		timeout = waittime;
-		func = std::move(donefunc);
-	}
-
-	bool isRunning() { return running; }
-
-	void setTimeout(std::chrono::duration<int> waittime)
-	{
-		timeout = waittime;
-	}
-
-	void start(std::chrono::duration<int> waittime = std::chrono::minutes(0))
-	{
-		if (waittime != std::chrono::minutes(0))
-			timeout = waittime;
-		if (running)
-			stop();
-		running = true;
-		t_time = std::thread(&Timer::worker, this);
-	}
-
-	void stop()
-	{
-		if (running)
-		{
-			running = false;
-			cond.notify_one();
-			t_time.join();
-		}
-	}
-};
+}

@@ -1,27 +1,8 @@
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <signal.h>
-#include <time.h>
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <pthread.h>
+#include "sendpacket.h"
 
-void senderror(const char* msg)
-{
-	perror(msg);
-	exit(1);
-}
-
-template <typename T, size_t N>
-int sendPacket(T(&buffer)[N], const char* ip)
+//template <typename T, size_t N>
+//int sendPacket(T(&buffer)[N], const char* ip)
+int sendPacket(uint8_t* buffer, const char* ip)
 {
 	int sock, n;
 	unsigned int length;
@@ -42,11 +23,17 @@ int sendPacket(T(&buffer)[N], const char* ip)
 	server.sin_port = htons(56700);
 	length = sizeof(struct sockaddr_in);
 
-	n = sendto(sock, buffer, sizeof(buffer), 0, (const struct sockaddr*) & server, length);
+	n = sendto(sock, buffer, sizeof(buffer), 0, (const struct sockaddr*)&server, length);
 	if (n < 0)
 		senderror("Sendto");
 	// printf("Sending Packet...\n");
 
 	close(sock);
 	return 0;
+}
+
+void senderror(const char* msg)
+{
+	perror(msg);
+	exit(1);
 }
