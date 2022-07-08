@@ -1,0 +1,5 @@
+[2020-04-21 23:46:27] Log entry started
+[2020-04-21 23:46:27] TIMEOUT value: 20.000000
+[2020-04-21 23:46:27] STARTTIME value: 11.000000
+[2020-04-21 23:46:27] STOPTIME value: 23.000000
+[2020-04-21 23:46:40] Turning on for last time

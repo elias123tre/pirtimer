@@ -1,0 +1,55 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build send-udp",
+      "type": "shell",
+      "command": "g++",
+      "args": ["-g", "-o", "send-udp", "send-udp.cpp"]
+    },
+    {
+      "type": "shell",
+      "label": "gcc.exe build active file",
+      "command": "C:/mingw-w64/mingw64/bin/gcc.exe",
+      "args": [
+        "-g",
+        "${file}",
+        "-o",
+        "${fileDirname}\\${fileBasenameNoExtension}.exe"
+      ],
+      "options": {
+        "cwd": "C:/mingw-w64/mingw64/bin"
+      }
+    },
+    {
+      "type": "shell",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "label": "Update service on Raspberry Pi",
+      "command": "C:\\Program Files\\Git\\usr\\bin\\ssh.exe",
+      "args": [
+        "-t",
+        "pi@raspi",
+        "./${workspaceFolderBasename}/build.sh build"
+        // "\"cd ./${workspaceFolderBasename} ; g++ ${fileBasenameNoExtension}.cpp -Wall -Wextra -Werror -Wfatal-errors -pthread -fconcepts ; echo \"Build done!\" ; sudo systemctl restart pirtimer\""
+      ]
+    },
+    {
+      "type": "shell",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "label": "Build and run file on Raspberry Pi",
+      "command": "C:\\Program Files\\Git\\usr\\bin\\ssh.exe",
+      "args": [
+        "-t",
+        "pi@raspi",
+        "./${workspaceFolderBasename}/build.sh test ${fileBasename}"
+        // "\"cd ./${workspaceFolderBasename} ; g++ ${fileBasenameNoExtension}.cpp -Wall -Wextra -Werror -Wfatal-errors -pthread -fconcepts -o ${fileBasenameNoExtension}.out ; echo \"Build done!\" ; ./${fileBasenameNoExtension}.out ; rm ./${fileBasenameNoExtension}.out\""
+      ]
+    }
+  ]
+}
